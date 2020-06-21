@@ -1,12 +1,7 @@
-extern crate chrono;
-#[macro_use]
-extern crate clap;
-extern crate dirs;
-extern crate open;
-extern crate rprompt;
 
 use chrono::prelude::*;
 use clap::{Arg, SubCommand};
+use clap::{app_from_crate, crate_name, crate_version, crate_authors, crate_description};
 use std::cmp;
 use std::collections::HashMap;
 use std::env;
