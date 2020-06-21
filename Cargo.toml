@@ -3,6 +3,7 @@ name = "habitctl"
 version = "0.1.0"
 authors = ["Sebastian Morr <sebastian@morr.cc>"]
 description = "Minimalist command line tool you can use to track and examine your habits."
+edition = "2018"
 
 [dependencies]
 chrono = "0.4.6"
