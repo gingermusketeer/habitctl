@@ -184,7 +184,8 @@ impl HabitCtl {
             &entry.date.format("%F"),
             &entry.habit,
             &entry.value
-        ).unwrap();
+        )
+        .unwrap();
     }
 
     fn log(&self, filters: &Vec<&str>) {
