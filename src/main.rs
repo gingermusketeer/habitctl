@@ -76,7 +76,7 @@ fn main() {
                 ago
             };
             habitctl.ask(ago);
-            habitctl.log(&vec![]);
+            habitctl.log(&[]);
         }
         ("edit", Some(_)) => habitctl.edit(),
         ("edith", Some(_)) => habitctl.edith(),
@@ -84,7 +84,7 @@ fn main() {
             // no subcommand used
             habitctl.assert_habits();
             habitctl.ask(ago);
-            habitctl.log(&vec![]);
+            habitctl.log(&[]);
         }
     }
 }
@@ -124,24 +124,24 @@ impl HabitCtl {
             );
         }
 
-        let mut log_file = habitctl_dir.clone();
+        let mut log_file = habitctl_dir;
         log_file.push("log");
         if !log_file.is_file() {
             fs::File::create(&log_file).unwrap();
 
             let file = OpenOptions::new().append(true).open(&habits_file).unwrap();
-            write!(
+            writeln!(
                 &file,
-                "# The numbers specifies how often you want to do a habit:\n"
-            );
-            write!(
+                "# The numbers specifies how often you want to do a habit:"
+            ).unwrap();
+            writeln!(
                 &file,
-                "# 1 means daily, 7 means weekly, 0 means you're just tracking the habit. Some examples:\n"
-            );
-            write!(
+                "# 1 means daily, 7 means weekly, 0 means you're just tracking the habit. Some examples:"
+            ).unwrap();
+            writeln!(
                 &file,
-                "\n# 1 Meditated\n# 7 Cleaned the apartment\n# 0 Had a headache\n# 1 Used habitctl\n"
-            );
+                "\n# 1 Meditated\n# 7 Cleaned the apartment\n# 0 Had a headache\n# 1 Used habitctl"
+            ).unwrap();
 
             println!(
                 "Created {}. This file will contain your habit log.\n",
@@ -174,13 +174,13 @@ impl HabitCtl {
 
         if let Some(last_date) = last_date {
             if last_date != entry.date {
-                write!(&file, "\n").unwrap();
+                writeln!(&file).unwrap();
             }
         }
 
-        write!(
+        writeln!(
             &file,
-            "{}\t{}\t{}\n",
+            "{}\t{}\t{}",
             &entry.date.format("%F"),
             &entry.habit,
             &entry.value
@@ -188,7 +188,7 @@ impl HabitCtl {
         .unwrap();
     }
 
-    fn log(&self, filters: &Vec<&str>) {
+    fn log(&self, filters: &[&str]) {
         let to = Local::now();
         let from = to.checked_sub_signed(chrono::Duration::days(100)).unwrap();
 
@@ -290,13 +290,13 @@ impl HabitCtl {
             }
 
             for habit in self.get_todo(&current) {
-                self.print_habit_row(&habit, log_from.date(), current.clone());
-                let l = format!("[y/n/-] ");
+                self.print_habit_row(&habit, log_from.date(), current);
+                let l = "[y/n/-] ";
 
                 let mut value;
                 loop {
-                    value = String::from(rprompt::prompt_reply_stdout(&l).unwrap());
-                    value = value.trim_right().to_string();
+                    value = rprompt::prompt_reply_stdout(&l).unwrap();
+                    value = value.trim_end().to_string();
 
                     if value == "y" || value == "n" || value == "" {
                         break;
@@ -305,7 +305,7 @@ impl HabitCtl {
 
                 if value != "" {
                     self.entry(&Entry {
-                        date: current.clone(),
+                        date: current,
                         habit: habit.name,
                         value,
                     });
@@ -384,7 +384,7 @@ impl HabitCtl {
         entries
     }
 
-    fn get_entry(&self, date: &Date<Local>, habit: &String) -> Option<&Entry> {
+    fn get_entry(&self, date: &Date<Local>, habit: &str) -> Option<&Entry> {
         self.entries
             .iter()
             .find(|entry| entry.date == *date && entry.habit == *habit)
@@ -454,13 +454,13 @@ impl HabitCtl {
     fn first_date(&self) -> Option<Date<Local>> {
         self.get_entries()
             .first()
-            .and_then(|entry| Some(entry.date.clone()))
+            .map(|entry| entry.date)
     }
 
     fn last_date(&self) -> Option<Date<Local>> {
         self.get_entries()
             .last()
-            .and_then(|entry| Some(entry.date.clone()))
+            .map(|entry| entry.date)
     }
 
     fn get_score(&self, score_date: &Date<Local>) -> f32 {
